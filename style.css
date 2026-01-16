@@ -1,26 +1,31 @@
 /* ---------------------------------------------------------
    1. متغيرات النظام (Theme Variables)
+   دعم التحكم من Admin Panel عبر CSS Variables
    --------------------------------------------------------- */
 :root {
+    /* الألوان الأساسية - يتم التحكم بها عبر JS */
+    --primary: #4f46e5;
+    --primary-glow: rgba(79, 70, 229, 0.2);
+    
+    /* ألوان الوضع الفاتح */
     --bg-main: #f8fafc;
     --bg-card: #ffffff;
     --text-main: #0f172a;
     --text-muted: #64748b;
     --border: #e2e8f0;
-    --primary: #4f46e5;
-    --primary-glow: rgba(79, 70, 229, 0.2);
     --glass: rgba(255, 255, 255, 0.75);
     --discord: #5865F2;
     --danger: #ef4444;
 }
 
 .dark {
+    /* ألوان الوضع الليلي */
+    --primary: #818cf8;
     --bg-main: #020617;
     --bg-card: #0f172a;
     --text-main: #f1f5f9;
     --text-muted: #94a3b8;
     --border: #1e293b;
-    --primary: #818cf8;
     --glass: rgba(15, 23, 42, 0.8);
 }
 
@@ -32,6 +37,7 @@ body {
     color: var(--text-main);
     overflow-x: hidden;
     min-height: 100vh;
+    transition: background-color 0.3s ease;
 }
 
 .glass-effect {
@@ -41,7 +47,7 @@ body {
     border: 1px solid var(--border);
 }
 
-/* سكرول بار مخفي */
+/* سكرول بار مخفي احترافي */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -68,6 +74,7 @@ body {
 .view-overlay {
     backdrop-filter: blur(4px);
     transition: all 0.4s ease;
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* ---------------------------------------------------------
@@ -79,6 +86,7 @@ body {
 
 #productModal > div {
     animation: modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border);
 }
 
 @keyframes modalSlideUp {
@@ -90,8 +98,9 @@ body {
    5. نظام التنبيه (Success Toast)
    --------------------------------------------------------- */
 #successToast {
-    box-shadow: 0 20px 40px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--primary);
 }
 
 /* ---------------------------------------------------------
@@ -119,19 +128,23 @@ body {
    7. الأزرار والفئات (Buttons & Categories)
    --------------------------------------------------------- */
 .cat-btn {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--text-muted);
+    border: 1px solid var(--border);
 }
 
 .cat-btn.active {
     background: var(--primary) !important;
+    border-color: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 8px 20px var(--primary-glow);
+    box-shadow: 0 10px 25px var(--primary-glow);
 }
 
 .cat-btn:not(.active):hover {
-    background: var(--border);
-    color: var(--text-main);
+    background: var(--bg-main);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
 }
 
 /* ---------------------------------------------------------
@@ -150,19 +163,22 @@ body {
 #productGrid > div:nth-child(1) { animation-delay: 0.1s; }
 #productGrid > div:nth-child(2) { animation-delay: 0.2s; }
 #productGrid > div:nth-child(3) { animation-delay: 0.3s; }
+#productGrid > div:nth-child(4) { animation-delay: 0.4s; }
+#productGrid > div:nth-child(5) { animation-delay: 0.5s; }
+#productGrid > div:nth-child(6) { animation-delay: 0.6s; }
 
 /* ---------------------------------------------------------
    9. التجاوب (Responsive Design)
    --------------------------------------------------------- */
 @media (max-width: 768px) {
     .product-card {
-        border-radius: 1.8rem;
+        border-radius: 2rem;
         padding: 1rem;
     }
     
     header h1 {
-        font-size: 2.5rem !important;
-        line-height: 1.2;
+        font-size: 3rem !important;
+        line-height: 1.1;
     }
 
     #cartSidebar {
@@ -170,18 +186,17 @@ body {
     }
     
     #productModal > div {
-        max-height: 95vh;
-        border-radius: 1.5rem;
+        max-height: 92vh;
+        border-radius: 2rem 2rem 0 0;
+        bottom: 0;
+        position: fixed;
     }
 }
 
-/* كود إخفاء الـ Scrollbar للمتصفحات (Chrome, Safari, Edge) */
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
-}
-
-/* كود إخفاء الـ Scrollbar لـ Firefox و IE */
-.no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
+/* ---------------------------------------------------------
+   10. فئات المساعدة الإضافية (Helper Classes)
+   --------------------------------------------------------- */
+.bg-indigo-600 { background-color: var(--primary) !important; }
+.text-indigo-600 { color: var(--primary) !important; }
+.border-indigo-600 { border-color: var(--primary) !important; }
+.ring-indigo-600 { --tw-ring-color: var(--primary) !important; }

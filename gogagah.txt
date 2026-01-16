@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD5Z1cBr-dCdZ7PKKbuYKaUKmiq5oS8lH4",
@@ -15,6 +15,27 @@ const db = getFirestore(app);
 
 let allProducts = [];
 let currentCategory = 'all';
+
+// --- 🎨 نظام مزامنة الثيم (Theme Synchronization) ---
+// هذه الدالة تراقب التغييرات في Firestore وتطبق اللون الأساسي فوراً
+const syncThemeWithAdmin = () => {
+    const themeDoc = doc(db, "settings", "appearance");
+    onSnapshot(themeDoc, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.primaryColor) {
+                // تطبيق اللون على المتغيرات التي قمنا بإنشائها في style.css
+                document.documentElement.style.setProperty('--primary', data.primaryColor);
+                
+                // تحديث الـ Glow (شفافية 20%)
+                const glowColor = data.primaryColor + '33'; // 33 تعني 20% opacity في hex
+                document.documentElement.style.setProperty('--primary-glow', glowColor);
+                
+                console.log("Global Theme Updated:", data.primaryColor);
+            }
+        }
+    });
+};
 
 // --- جلب البيانات من Firestore ---
 async function fetchProducts() {
@@ -52,7 +73,7 @@ function renderProducts(products) {
                 <div id="slider-${pIndex}" class="w-full h-full flex transition-transform duration-500 ease-out" style="transform: translateX(0%);">
                     ${imgList.map(img => `<img src="${img}" class="w-full h-full object-cover flex-shrink-0">`).join('')}
                 </div>
-                <div class="view-overlay absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background: rgba(79, 70, 229, 0.1);">
+                <div class="view-overlay absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span class="bg-white/90 dark:bg-slate-900/90 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl dark:text-white">View Product</span>
                 </div>
                 ${imgList.length > 1 ? `
@@ -134,6 +155,13 @@ window.addToCart = (id) => {
         window.cart.push(product);
         localStorage.setItem('cart', JSON.stringify(window.cart));
         window.updateCartUI();
+        
+        // إظهار Toast نجاح (اختياري)
+        const toast = document.getElementById('successToast');
+        if (toast) {
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
     }
 };
 
@@ -171,7 +199,7 @@ window.updateCartUI = () => {
     if (cartTotal) cartTotal.innerText = `$${total.toFixed(2)}`;
 };
 
-// --- وظائف الديسكورد والخلاص الجديدة ---
+// --- وظائف الديسكورد والخلاص ---
 window.openSupport = () => {
     window.open("https://discord.gg/zYKEnZVGuE", "_blank");
 };
@@ -187,6 +215,7 @@ window.startCheckout = () => {
     }
 };
 
-// تشغيل جلب البيانات
+// --- تشغيل الوظائف عند التحميل ---
 fetchProducts();
+syncThemeWithAdmin(); // تفعيل مراقبة الثيم
 window.updateCartUI();
