@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just99Cents | Premium Marketplace</title>
+    
+    <link rel="icon" type="image/png" href="logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Tajawal:wght@500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = { 
+            darkMode: 'class', 
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'Tajawal', 'sans-serif'] } 
+                } 
+            } 
+        }
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans selection:bg-indigo-100">
+
+    <nav class="fixed top-0 w-full z-[100] px-4 py-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl rounded-[2rem] border border-white/20 dark:border-slate-800/50 px-6 py-3 shadow-2xl">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="window.location.reload()">
+                <div class="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-indigo-500/30">
+                    <img src="logo.png" alt="Logo" class="h-6 w-6 object-contain brightness-0 invert">
+                </div>
+                <span class="hidden md:block text-xl font-black tracking-tighter uppercase italic dark:text-white">
+                    Just99<span class="text-indigo-600">Cents</span>
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2 md:gap-4">
+                <div id="authContainer" class="flex items-center gap-2">
+                    <button id="loginBtn" onclick="window.openAuth('login')" class="text-[11px] font-black uppercase px-4 py-2 hover:text-indigo-600 transition-all tracking-widest">Login</button>
+                    <button id="regBtn" onclick="window.openAuth('register')" class="text-[11px] font-black uppercase px-5 py-2.5 bg-indigo-600 text-white rounded-full hover:bg-black transition-all shadow-xl shadow-indigo-500/20 active:scale-95">Register</button>
+                    
+                    <div id="userSection" class="relative group hidden">
+                        <button class="flex items-center gap-2 p-1 hover:scale-105 transition-transform">
+                            <img id="userPhoto" src="" class="w-10 h-10 rounded-full border-2 border-indigo-600 object-cover shadow-md bg-slate-200">
+                        </button>
+                        <div class="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-800 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-300 z-[150]">
+                            <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 mb-2">
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Account</p>
+                                <p id="userName" class="text-sm font-black dark:text-white truncate">User Name</p>
+                            </div>
+                            <div class="px-2 space-y-1">
+                                <button onclick="window.handleLogout()" class="flex items-center gap-3 w-full text-left px-4 py-2.5 text-[12px] font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all">🚪 Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1"></div>
+
+                <div class="flex items-center gap-2">
+                    <a href="https://discord.gg/zYKEnZVGuE" target="_blank" class="p-3 rounded-full bg-[#5865F2]/10 text-[#5865F2] hover:bg-[#5865F2] hover:text-white transition-all shadow-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.125-.094.249-.192.37-.293a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .077.01c.12.101.246.199.37.293a.077.077 0 0 1-.007.128 12.986 12.986 0 0 1-1.874.892.076.076 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+                    </a>
+                    
+                    <button onclick="window.toggleDarkMode()" class="p-3 rounded-full bg-slate-100 dark:bg-slate-800/50 transition-all hover:scale-110 active:scale-90">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button id="cartBtnIcon" onclick="window.toggleCart()" class="relative p-3 bg-indigo-600 text-white rounded-full hover:scale-110 shadow-xl transition-all active:scale-90">
+                        🛒 <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-[10px] font-bold px-1.5 rounded-full border-2 border-white dark:border-slate-900">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-48 pb-20 px-6 text-center max-w-5xl mx-auto relative">
+        <div class="absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-indigo-500/10 blur-[120px] rounded-full -z-10 animate-pulse"></div>
+        
+        <div class="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-100/50 dark:border-indigo-800/30">
+            <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+            Global Digital Asset Marketplace
+        </div>
+        <h1 class="text-6xl md:text-8xl font-black mb-8 dark:text-white leading-[1.05] tracking-tight">
+            Premium Templates <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">For Only $0.99</span>
+        </h1>
+        <p class="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed">
+            High-quality UI kits, landing pages, and professional templates accessible to everyone.
+        </p>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-6 mb-16">
+        <div class="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-3 overflow-x-auto no-scrollbar p-2">
+            <button id="cat-all" onclick="window.filterCat('all')" class="cat-btn active px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">All Items</button>
+            <button id="cat-landing" onclick="window.filterCat('landing')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">Landing</button>
+            <button id="cat-portfolio" onclick="window.filterCat('portfolio')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">Portfolio</button>
+            <button id="cat-ecommerce" onclick="window.filterCat('ecommerce')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">E-commerce</button>
+            <button id="cat-dashboard" onclick="window.filterCat('dashboard')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">Dashboard</button>
+            <button id="cat-saas" onclick="window.filterCat('saas')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">SaaS</button>
+            <button id="cat-uikit" onclick="window.filterCat('uikit')" class="cat-btn px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap">UI Kits</button>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 pb-32">
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+    </main>
+
+    <div id="productModal" class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md hidden opacity-0 transition-all duration-300">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg max-h-[90vh] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col relative overflow-y-auto no-scrollbar">
+            <button onclick="window.closeProductModal()" class="absolute top-4 right-4 z-50 bg-white/80 dark:bg-black/50 p-2 rounded-full hover:rotate-90 transition-all shadow-lg text-black dark:text-white">✕</button>
+            <div class="relative w-full h-64 sm:h-80 flex-shrink-0 bg-slate-100 dark:bg-slate-800 group">
+                <div id="modalSliderTrack" class="w-full h-full flex transition-transform duration-500 ease-out"></div>
+                <button id="modalPrevBtn" onclick="window.moveModalSlider(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-indigo-600 flex items-center justify-center hover:scale-110 transition-all shadow-lg backdrop-blur-sm hidden">❮</button>
+                <button id="modalNextBtn" onclick="window.moveModalSlider(1)" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-black/50 text-indigo-600 flex items-center justify-center hover:scale-110 transition-all shadow-lg backdrop-blur-sm hidden">❯</button>
+            </div>
+            <div class="p-8 flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-4">
+                    <div id="modalCat" class="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-[10px] font-black uppercase">Category</div>
+                    <div id="modalPrice" class="text-2xl font-black text-indigo-600">$0.99</div>
+                </div>
+                <h2 id="modalTitle" class="text-2xl font-black mb-3 dark:text-white leading-tight">Product Title</h2>
+                <p id="modalDesc" class="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">Description goes here...</p>
+                <div class="mt-auto space-y-3">
+                    <a id="modalDemo" href="#" target="_blank" class="block w-full text-center py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 font-bold text-slate-600 dark:text-slate-300 hover:border-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all">🌐 View Live Demo</a>
+                    <button id="modalAddBtn" class="block w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-600/20 hover:scale-[1.02] active:scale-95 transition-all">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="successToast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[400] bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-2xl flex items-center gap-3 translate-y-32 opacity-0 transition-all duration-500">
+        <span class="text-xl">✅</span> Item added to cart!
+    </div>
+    <div id="cartOverlay" onclick="window.toggleCart()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden opacity-0 transition-opacity duration-300"></div>
+    
+    <aside id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-slate-950 z-[120] shadow-2xl flex flex-col transition-transform duration-500 transform translate-x-full border-l dark:border-slate-800">
+        <div class="p-6 border-b dark:border-slate-800 flex justify-between items-center">
+            <h2 class="text-2xl font-black dark:text-white">Your Cart 🛒</h2>
+            <button onclick="window.toggleCart()" class="text-2xl hover:rotate-90 transition-transform">✕</button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar"></div>
+        <div class="p-6 border-t dark:border-slate-800 space-y-3 bg-slate-50/50 dark:bg-slate-900/50">
+            <div class="flex justify-between items-center font-black text-xl dark:text-white mb-2">
+                <span>Total:</span> <span id="cartTotal" class="text-indigo-600">$0.00</span>
+            </div>
+            <button onclick="window.startCheckout()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg shadow-xl hover:bg-black transition-all">💳 Proceed to Checkout</button>
+        </div>
+    </aside>
+
+    <div id="authModal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative border border-slate-200 dark:border-slate-800">
+            <button onclick="window.toggleAuthModal()" class="absolute top-6 right-6 text-slate-400 font-bold hover:text-black">✕</button>
+            <div class="text-center mb-6">
+                <h2 id="authTitle" class="text-2xl font-black dark:text-white">Sign In</h2>
+                <p id="authDesc" class="text-xs text-slate-500 mt-1">Join the global marketplace</p>
+            </div>
+            <div class="space-y-4">
+                <button onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-3 rounded-2xl font-bold text-sm hover:bg-slate-50 transition-all dark:text-white">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Google Login
+                </button>
+                <div class="relative py-2 flex items-center"><div class="flex-grow border-t dark:border-slate-800"></div><span class="px-3 text-[10px] text-slate-400 uppercase">OR</span><div class="flex-grow border-t dark:border-slate-800"></div></div>
+                <input type="email" id="authEmail" placeholder="Email" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-600 dark:text-white">
+                <input type="password" id="authPassword" placeholder="Password" class="w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-600 dark:text-white">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="hidden w-full bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-600 dark:text-white">
+                <button onclick="window.handleAuthAction()" id="authSubmit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-black transition-all">Sign In</button>
+                <p class="text-center text-xs text-slate-500 mt-4 cursor-pointer" onclick="window.toggleAuthMode()">
+                    <span id="authToggleText">New here?</span> <span id="authActionText" class="text-indigo-600 font-bold underline">Create Account</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5Z1cBr-dCdZ7PKKbuYKaUKmiq5oS8lH4",
+            authDomain: "just99cents-671d4.firebaseapp.com",
+            projectId: "just99cents-671d4",
+            storageBucket: "just99cents-671d4.firebasestorage.app",
+            messagingSenderId: "718410856076",
+            appId: "1:718410856076:web:880e92a8af24d9e360eda9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        onAuthStateChanged(auth, (user) => {
+            const loginBtn = document.getElementById('loginBtn');
+            const regBtn = document.getElementById('regBtn');
+            const userSection = document.getElementById('userSection');
+            if (user) {
+                loginBtn?.classList.add('hidden'); regBtn?.classList.add('hidden');
+                userSection?.classList.remove('hidden');
+                document.getElementById('userName').innerText = user.displayName || user.email.split('@')[0];
+                document.getElementById('userPhoto').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=4f46e5&color=fff`;
+            } else {
+                loginBtn?.classList.remove('hidden'); regBtn?.classList.remove('hidden'); userSection?.classList.add('hidden');
+            }
+        });
+
+        window.handleGoogleLogin = () => signInWithPopup(auth, provider).then(() => window.toggleAuthModal()).catch(e => alert(e.message));
+        window.handleLogout = () => signOut(auth).then(() => window.location.reload());
+        window.handleAuthAction = async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const isRegister = !document.getElementById('confirmPassword').classList.contains('hidden');
+            try {
+                if (isRegister) await createUserWithEmailAndPassword(auth, email, password);
+                else await signInWithEmailAndPassword(auth, email, password);
+                window.toggleAuthModal();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.toggleAuthMode = () => {
+            const isLogin = document.getElementById('authTitle').innerText === 'Sign In';
+            document.getElementById('authTitle').innerText = isLogin ? 'Create Account' : 'Sign In';
+            document.getElementById('authSubmit').innerText = isLogin ? 'Sign Up' : 'Sign In';
+            document.getElementById('confirmPassword').classList.toggle('hidden');
+            document.getElementById('authActionText').innerText = isLogin ? 'Sign In' : 'Create Account';
+            document.getElementById('authToggleText').innerText = isLogin ? 'Already have an account?' : 'New here?';
+        };
+
+        window.toggleDarkMode = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.theme = isDark ? 'dark' : 'light';
+            document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+        };
+
+        window.toggleAuthModal = () => document.getElementById('authModal').classList.toggle('hidden');
+        window.openAuth = (mode) => {
+            document.getElementById('authModal').classList.remove('hidden');
+            const isReg = mode === 'register';
+            const hasConfirm = !document.getElementById('confirmPassword').classList.contains('hidden');
+            if ((isReg && !hasConfirm) || (!isReg && hasConfirm)) window.toggleAuthMode();
+        };
+    </script>
+    <script type="module" src="script.js"></script>
+
+    <script>
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.onkeydown = function(e) {
+        if (event.keyCode == 123) return false;
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        if (e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false;
+    };
+    </script>
+</body>
+</html>
