@@ -11,13 +11,9 @@
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
         .dark .glass { background: rgba(15, 23, 42, 0.8); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* أنيميشن التحميل */
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-soft { animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        
-        /* Custom Accent Color for Admin Preview */
-        :root { --admin-primary: #4f46e5; }
-        .bg-admin { background-color: var(--admin-primary); }
-        .text-admin { color: var(--admin-primary); }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pb-20">
@@ -34,28 +30,6 @@
         </header>
 
         <div id="mainContent" class="hidden space-y-10">
-            
-            <section class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
-                <h2 class="text-xl font-black mb-8 flex items-center gap-3">
-                    <span class="bg-amber-500 text-white p-2 rounded-lg text-sm">🎨</span> Site Appearance
-                </h2>
-                <div class="flex flex-wrap items-center gap-8">
-                    <div class="flex flex-col gap-3">
-                        <label class="text-sm font-bold text-slate-500">Primary Theme Color</label>
-                        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
-                            <input type="color" id="themeColorPicker" class="w-12 h-12 rounded-lg cursor-pointer bg-transparent border-none">
-                            <input type="text" id="themeColorHex" placeholder="#4f46e5" class="bg-transparent font-mono font-bold outline-none w-24">
-                        </div>
-                    </div>
-                    <div class="flex-1 min-w-[200px]">
-                        <p class="text-xs text-slate-400 mb-4 font-medium">This will update the primary color (buttons, icons, glows) across the entire website for all users in real-time.</p>
-                        <button id="saveThemeBtn" class="bg-black dark:bg-white dark:text-black text-white px-8 py-4 rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-lg active:scale-95">
-                            Update Global Theme
-                        </button>
-                    </div>
-                </div>
-            </section>
-
             <section class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
                 <h2 class="text-xl font-black mb-8 flex items-center gap-3">
                     <span class="bg-indigo-600 text-white p-2 rounded-lg text-sm">➕</span> Add New Product
@@ -93,7 +67,7 @@
                     <span class="bg-indigo-600 text-white p-2 rounded-lg text-sm">📦</span> Inventory Management
                 </h2>
                 <div id="adminProductList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                </div>
+                    </div>
             </section>
         </div>
 
@@ -108,7 +82,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5Z1cBr-dCdZ7PKKbuYKaUKmiq5oS8lH4",
@@ -123,6 +97,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // الحماية بالـ UID حيت هي اللي مأمنة فالسيرفر
         const MASTER_ADMIN_ID = "pgUWgtONgWfq7SgHm5Q0mGvusvV2"; 
 
         onAuthStateChanged(auth, (user) => {
@@ -137,7 +112,6 @@
                 content.classList.remove('hidden');
                 denied.classList.add('hidden');
                 fetchAdminProducts();
-                loadCurrentTheme(); // جلب الثيم الحالي عند الدخول
             } else {
                 content.classList.add('hidden');
                 denied.classList.remove('hidden');
@@ -146,43 +120,6 @@
             }
         });
 
-        // --- وظائف التحكم في الثيم (Theme Functions) ---
-        async function loadCurrentTheme() {
-            const docRef = doc(db, "settings", "appearance");
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const color = docSnap.data().primaryColor;
-                document.getElementById('themeColorPicker').value = color;
-                document.getElementById('themeColorHex').value = color;
-            }
-        }
-
-        document.getElementById('themeColorPicker').oninput = (e) => {
-            document.getElementById('themeColorHex').value = e.target.value;
-        };
-
-        document.getElementById('saveThemeBtn').onclick = async () => {
-            const newColor = document.getElementById('themeColorHex').value;
-            const btn = document.getElementById('saveThemeBtn');
-            btn.innerText = "Syncing Colors...";
-            btn.disabled = true;
-
-            try {
-                await setDoc(doc(db, "settings", "appearance"), {
-                    primaryColor: newColor,
-                    lastUpdated: serverTimestamp()
-                }, { merge: true });
-                alert("Website theme updated successfully! ✨");
-            } catch (err) {
-                alert("Error updating theme. Check console.");
-                console.error(err);
-            } finally {
-                btn.innerText = "Update Global Theme";
-                btn.disabled = false;
-            }
-        };
-
-        // --- إدارة المنتجات (Product Management) ---
         async function fetchAdminProducts() {
             const list = document.getElementById('adminProductList');
             list.innerHTML = `<p class="col-span-full text-center py-10 font-bold opacity-50 animate-pulse">Scanning Database...</p>`;
@@ -233,7 +170,7 @@
                 images: document.getElementById('images').value,
                 demo_url: document.getElementById('demo_url').value,
                 price: document.getElementById('price').value,
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp() // أفضل للاستعمال فالسيرفر
             };
 
             try {
