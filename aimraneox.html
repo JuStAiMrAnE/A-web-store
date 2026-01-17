@@ -11,7 +11,6 @@
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
         .dark .glass { background: rgba(15, 23, 42, 0.8); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        /* أنيميشن التحميل */
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-soft { animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
@@ -31,11 +30,11 @@
 
         <div id="mainContent" class="hidden space-y-10">
             <section class="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
-                <h2 class="text-xl font-black mb-8 flex items-center gap-3">
+                <h2 id="formTitle" class="text-xl font-black mb-8 flex items-center gap-3">
                     <span class="bg-indigo-600 text-white p-2 rounded-lg text-sm">➕</span> Add New Product
                 </h2>
                 <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input type="text" id="title" placeholder="Product Title" required class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
+                    <input type="hidden" id="productId"> <input type="text" id="title" placeholder="Product Title" required class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
                     
                     <select id="category" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
                         <option value="landing">Landing Page</option>
@@ -56,9 +55,14 @@
                     <input type="url" id="demo_url" placeholder="Live Demo URL" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
                     <input type="text" id="price" value="0.99" class="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-indigo-500 transition-all">
                     
-                    <button type="submit" id="submitBtn" class="md:col-span-2 bg-indigo-600 text-white py-5 rounded-3xl font-black text-lg hover:bg-black transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
-                        Publish Product
-                    </button>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" id="submitBtn" class="flex-1 bg-indigo-600 text-white py-5 rounded-3xl font-black text-lg hover:bg-black transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
+                            Publish Product
+                        </button>
+                        <button type="button" id="cancelEditBtn" onclick="window.resetForm()" class="hidden bg-slate-200 dark:bg-slate-800 px-8 rounded-3xl font-bold hover:bg-red-500 hover:text-white transition-all">
+                            Cancel
+                        </button>
+                    </div>
                 </form>
             </section>
 
@@ -82,7 +86,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5Z1cBr-dCdZ7PKKbuYKaUKmiq5oS8lH4",
@@ -97,8 +101,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // الحماية بالـ UID حيت هي اللي مأمنة فالسيرفر
         const MASTER_ADMIN_ID = "pgUWgtONgWfq7SgHm5Q0mGvusvV2"; 
+        let isEditing = false;
 
         onAuthStateChanged(auth, (user) => {
             const content = document.getElementById('mainContent');
@@ -120,6 +124,7 @@
             }
         });
 
+        // جلب المنتجات وعرضها
         async function fetchAdminProducts() {
             const list = document.getElementById('adminProductList');
             list.innerHTML = `<p class="col-span-full text-center py-10 font-bold opacity-50 animate-pulse">Scanning Database...</p>`;
@@ -144,25 +149,61 @@
                             <h3 class="font-black text-sm truncate dark:text-white">${p.title}</h3>
                             <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">${p.category}</p>
                         </div>
-                        <button onclick="window.deleteProduct('${docSnap.id}')" class="bg-red-50 dark:bg-red-500/10 text-red-500 py-3 rounded-2xl font-bold text-xs hover:bg-red-500 hover:text-white transition-all">
-                            🗑️ Delete Product
-                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick='window.editProduct("${docSnap.id}", ${JSON.stringify(p).replace(/'/g, "&apos;")})' class="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 py-3 rounded-2xl font-bold text-xs hover:bg-indigo-600 hover:text-white transition-all">
+                                ✏️ Edit
+                            </button>
+                            <button onclick="window.deleteProduct('${docSnap.id}')" class="bg-red-50 dark:bg-red-500/10 text-red-500 py-3 rounded-2xl font-bold text-xs hover:bg-red-500 hover:text-white transition-all">
+                                🗑️ Delete
+                            </button>
+                        </div>
                     `;
                     list.appendChild(card);
                 });
             } catch (err) { 
-                console.error("Fetch error:", err); 
                 list.innerHTML = `<p class="text-red-500 font-bold text-center col-span-full">Database connection error.</p>`;
             }
         }
 
+        // تحضير النموذج للتعديل
+        window.editProduct = (id, data) => {
+            isEditing = true;
+            document.getElementById('productId').value = id;
+            document.getElementById('title').value = data.title;
+            document.getElementById('category').value = data.category;
+            document.getElementById('desc').value = data.desc || '';
+            document.getElementById('image').value = data.image;
+            document.getElementById('images').value = data.images || '';
+            document.getElementById('demo_url').value = data.demo_url || '';
+            document.getElementById('price').value = data.price || '0.99';
+
+            document.getElementById('formTitle').innerHTML = `<span class="bg-orange-500 text-white p-2 rounded-lg text-sm">✏️</span> Editing Product`;
+            document.getElementById('submitBtn').innerText = "Update Product Info";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // إعادة تعيين النموذج
+        window.resetForm = () => {
+            isEditing = false;
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = "";
+            document.getElementById('formTitle').innerHTML = `<span class="bg-indigo-600 text-white p-2 rounded-lg text-sm">➕</span> Add New Product`;
+            document.getElementById('submitBtn').innerText = "Publish Product";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        };
+
+        // معالجة الإرسال (إضافة أو تعديل)
         document.getElementById('productForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
+            const id = document.getElementById('productId').value;
+            
             btn.disabled = true;
-            btn.innerText = "Encrypting & Uploading...";
+            btn.innerText = isEditing ? "Updating Database..." : "Publishing...";
 
-            const newProduct = {
+            const productData = {
                 title: document.getElementById('title').value,
                 category: document.getElementById('category').value,
                 desc: document.getElementById('desc').value,
@@ -170,30 +211,34 @@
                 images: document.getElementById('images').value,
                 demo_url: document.getElementById('demo_url').value,
                 price: document.getElementById('price').value,
-                createdAt: serverTimestamp() // أفضل للاستعمال فالسيرفر
+                updatedAt: serverTimestamp()
             };
 
+            if (!isEditing) productData.createdAt = serverTimestamp();
+
             try {
-                await addDoc(collection(db, "products"), newProduct);
-                alert("Boom! Product is now live. 🚀");
-                document.getElementById('productForm').reset();
+                if (isEditing) {
+                    await updateDoc(doc(db, "products", id), productData);
+                    alert("Updated successfully! ✅");
+                } else {
+                    await addDoc(collection(db, "products"), productData);
+                    alert("Published successfully! 🚀");
+                }
+                window.resetForm();
                 fetchAdminProducts();
             } catch (err) { 
-                alert("Permission Denied: You don't have write access."); 
+                alert("Error: Action denied."); 
             } finally { 
                 btn.disabled = false; 
-                btn.innerText = "Publish Product"; 
             }
         };
 
         window.deleteProduct = async (id) => {
-            if (confirm("Confirm Deletion? This will remove the asset from the main store permanently.")) {
+            if (confirm("Permanently delete this product?")) {
                 try {
                     await deleteDoc(doc(db, "products", id));
                     fetchAdminProducts();
-                } catch (err) { 
-                    alert("Security Error: Only the Master Admin can delete."); 
-                }
+                } catch (err) { alert("Delete failed."); }
             }
         };
     </script>
